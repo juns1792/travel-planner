@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 트래블 플래너 (Travel Planner)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="app-header py-4 mb-4">
+        <div class="container text-center">
+            <div class="d-inline-flex align-items-center gap-2 mb-2 header-badge px-3 py-1 rounded-pill">
+                <i class="fa-solid fa-wand-magic-sparkles text-warning"></i>
+                <span class="small fw-semibold">AI Powered Itinerary Planner</span>
+            </div>
+            <h1 class="app-title fw-bold">✈️ AI 트래블 플래너</h1>
+            <p class="app-subtitle text-muted mb-0">
+                어디로 떠나고 싶으신가요? 조건만 입력하면 AI가 동선부터 핫플레이스까지 맞춤 일정을 설계해 드립니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                
+                <!-- Input Form Card -->
+                <div class="card planning-card shadow-sm border-0 mb-4" id="formCard">
+                    <div class="card-body p-4 p-md-5">
+                        <form id="planForm">
+                            <!-- 1. 여행지 입력 -->
+                            <div class="mb-4">
+                                <label for="destination" class="form-label fw-bold d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-primary"></i> 1. 어디로 떠나시나요?
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="destination" placeholder="예: 제주도, 오사카, 다낭, 파리, 강릉..." required>
+                                </div>
+                                <div class="mt-2 destination-chips d-flex flex-wrap gap-1 align-items-center">
+                                    <span class="small text-muted me-1"><i class="fa-solid fa-fire text-danger"></i> 인기 추천:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="제주도">제주도</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="오사카">오사카</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="도쿄">도쿄</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="후쿠오카">후쿠오카</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="다낭">다낭</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="방콕">방콕</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="파리">파리</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill chip-btn" data-dest="부산">부산</button>
+                                </div>
+                            </div>
+
+                            <!-- 2. 여행 일정 & 동행자 (2단 레이아웃) -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="duration" class="form-label fw-bold d-flex align-items-center gap-2">
+                                        <i class="fa-regular fa-calendar-days text-primary"></i> 2. 여행 기간
+                                    </label>
+                                    <select class="form-select form-select-lg" id="duration">
+                                        <option value="당일치기">당일치기</option>
+                                        <option value="1박 2일">1박 2일</option>
+                                        <option value="2박 3일" selected>2박 3일</option>
+                                        <option value="3박 4일">3박 4일</option>
+                                        <option value="4박 5일">4박 5일</option>
+                                        <option value="일주일 (6박 7일)">일주일 (6박 7일)</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="companion" class="form-label fw-bold d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-user-group text-primary"></i> 3. 누구와 함께 가나요?
+                                    </label>
+                                    <select class="form-select form-select-lg" id="companion">
+                                        <option value="나홀로 (솔로 여행)" selected>나홀로 (솔로 여행)</option>
+                                        <option value="연인 / 커플">연인 / 커플</option>
+                                        <option value="친구들과 함께">친구들과 함께</option>
+                                        <option value="가족 (어린이 동반)">가족 (어린이 동반)</option>
+                                        <option value="부모님 효도 여행">부모님 효도 여행</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 4. 선호 여행 스타일 (다중 선택) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-heart text-danger"></i> 4. 어떤 여행을 좋아하세요? (다중 선택 가능)
+                                </label>
+                                <div class="row g-2">
+                                    <div class="col-6 col-sm-4 col-md">
+                                        <label class="style-card w-100 p-3 text-center border rounded-3 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                            <input type="checkbox" name="styles" value="힐링 & 휴식" class="d-none" checked>
+                                            <i class="fa-solid fa-spa fs-3 text-success mb-2"></i>
+                                            <span class="fw-semibold small">힐링 & 휴식</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-md">
+                                        <label class="style-card w-100 p-3 text-center border rounded-3 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                            <input type="checkbox" name="styles" value="맛집 & 미식 탐방" class="d-none" checked>
+                                            <i class="fa-solid fa-utensils fs-3 text-warning mb-2"></i>
+                                            <span class="fw-semibold small">맛집 & 미식</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-md">
+                                        <label class="style-card w-100 p-3 text-center border rounded-3 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                            <input type="checkbox" name="styles" value="명소 & 랜드마크 관광" class="d-none">
+                                            <i class="fa-solid fa-camera-retro fs-3 text-primary mb-2"></i>
+                                            <span class="fw-semibold small">명소 & 관광</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-md">
+                                        <label class="style-card w-100 p-3 text-center border rounded-3 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                            <input type="checkbox" name="styles" value="액티비티 & 체험" class="d-none">
+                                            <i class="fa-solid fa-person-hiking fs-3 text-info mb-2"></i>
+                                            <span class="fw-semibold small">액티비티</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-md">
+                                        <label class="style-card w-100 p-3 text-center border rounded-3 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                            <input type="checkbox" name="styles" value="쇼핑 & 문화 예술" class="d-none">
+                                            <i class="fa-solid fa-bag-shopping fs-3 text-purple mb-2"></i>
+                                            <span class="fw-semibold small">쇼핑 & 문화</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. 예산 및 추가 요구사항 -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-5">
+                                    <label for="budget" class="form-label fw-bold d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-wallet text-success"></i> 5. 예산 수준
+                                    </label>
+                                    <select class="form-select form-select-lg" id="budget">
+                                        <option value="알뜰한 가성비 중심">알뜰한 가성비 중심</option>
+                                        <option value="표준 / 적당히 즐기는 여행" selected>표준 / 적당히 즐기는 여행</option>
+                                        <option value="여유로운 럭셔리 & 호캉스">여유로운 럭셔리 & 호캉스</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-7">
+                                    <label for="notes" class="form-label fw-bold d-flex align-items-center gap-2">
+                                        <i class="fa-regular fa-comment-dots text-primary"></i> 6. 추가 요청사항 (선택)
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="notes" placeholder="예: 인스타 감성 카페 필수, 대중교통 위주, 해산물 좋아함">
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 btn-generate">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    <span>AI 맞춤 여행 일정 만들기</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Loading State (처음에는 숨김) -->
+                <div class="card loading-card shadow-sm border-0 py-5 text-center d-none" id="loadingCard">
+                    <div class="card-body">
+                        <div class="flight-anim mb-4">
+                            <i class="fa-solid fa-plane-departure fs-1 text-primary animate-bounce"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">AI가 완벽한 일정을 계획하고 있습니다</h4>
+                        <p class="text-muted mb-4" id="loadingStatusText">여행지의 핫플레이스와 인기 명소를 탐색하고 있습니다...</p>
+                        <div class="progress w-50 mx-auto" style="height: 6px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary w-100"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Container (일정 생성 후 표시) -->
+                <div class="result-container d-none" id="resultContainer">
+                    
+                    <!-- Trip Overview Card -->
+                    <div class="card overview-card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4 p-md-5 text-white position-relative">
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-semibold" id="resDestination"></span>
+                                <span class="badge bg-white-20 text-white px-3 py-2 rounded-pill fw-semibold" id="resDuration"></span>
+                                <span class="badge bg-white-20 text-white px-3 py-2 rounded-pill fw-semibold" id="resBudget"></span>
+                            </div>
+                            <h2 class="fw-bold mb-3" id="resTitle"></h2>
+                            <p class="res-summary mb-0 fs-5 opacity-90" id="resSummary"></p>
+                        </div>
+                    </div>
+
+                    <!-- Daily Schedule Tabs & Timeline -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                <h4 class="fw-bold mb-0 text-dark">
+                                    <i class="fa-solid fa-map-location-dot text-primary me-2"></i>일자별 여행 코스
+                                </h4>
+                                <div class="action-buttons d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-pill" id="copyPlanBtn">
+                                        <i class="fa-regular fa-copy me-1"></i> 일정 복사
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm rounded-pill" id="printPlanBtn">
+                                        <i class="fa-solid fa-print me-1"></i> 인쇄 / 저장
+                                    </button>
+                                </div>
+                            </div>
+                            <ul class="nav nav-pills custom-nav-pills gap-2" id="dayTabs" role="tablist">
+                                <!-- Day 탭 동적 생성 -->
+                            </ul>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- 일정 타임라인 콘텐츠 동적 생성 -->
+                            <div class="tab-content" id="dayTabsContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Details: 준비물 체크리스트 & 여행 팁 (2단) -->
+                    <div class="row g-4 mb-4">
+                        <!-- 체크리스트 -->
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-clipboard-check text-success"></i> 맞춤 준비물 체크리스트
+                                    </h5>
+                                    <div class="checklist-container" id="resPackingList"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 여행 꿀팁 -->
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-lightbulb text-warning"></i> 현지 여행 꿀팁
+                                    </h5>
+                                    <ul class="tips-list mb-0" id="resTravelTips"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reset Button -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary btn-lg px-4 rounded-pill fw-semibold" id="newPlanBtn">
+                            <i class="fa-solid fa-rotate-left me-2"></i> 새로운 여행 계획하기
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-muted border-top bg-white">
+        <div class="container small">
+            <p class="mb-1">AI Travel Planner &copy; 2025. Powered by Google Gemini.</p>
+            <p class="mb-0 text-secondary">여행지별 운영 시간 및 현지 상황은 방문 전 공식 웹사이트나 지도를 재확인해주세요.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
