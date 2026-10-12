@@ -6,7 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'travel-planner-default-secret')
 
 # 시스템 프롬프트: 여행 플래너 AI
