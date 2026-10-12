@@ -173,10 +173,13 @@ def generate_mock_plan(destination, duration, styles, companion, budget, notes):
     }
 
 @app.route('/')
+@app.route('/api/index')
+@app.route('/api/index.py')
 def index():
     return render_template('index.html')
 
 @app.route('/api/generate-plan', methods=['POST'])
+@app.route('/api/index/api/generate-plan', methods=['POST'])
 def api_generate_plan():
     data = request.get_json() or {}
     destination = data.get('destination', '').strip()

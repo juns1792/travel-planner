@@ -8,5 +8,19 @@ if BASE_DIR not in sys.path:
 
 from app import app
 
-# Vercel Serverless Function 진입점
-# app 객체가 WSGI 애플리케이션으로 동작합니다.
+# WSGI 미들웨어: Vercel rewrite로 전달된 prefix(/api/index 등) 보정
+class VercelPathMiddleware:
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        for prefix in ['/api/index.py', '/api/index']:
+            if path.startswith(prefix):
+                new_path = path[len(prefix):]
+                environ['PATH_INFO'] = new_path if new_path else '/'
+                break
+        return self.wsgi_app(environ, start_response)
+
+# WSGI 앱 래핑
+app.wsgi_app = VercelPathMiddleware(app.wsgi_app)
